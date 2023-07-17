@@ -37,72 +37,78 @@ ensure cfx-anes-worldsync
 
 ## Client Exports
 
-| Command          | Description                        |
-| ---------------- | ---------------------------------- |
-| `getDensity`     | Returns current density multiplier |
-| `getTime`        | Returns current time object        |
-| `getWeather`     | Returns current weather            |
-| `useTimeHook`    | [Usage](#usetimehook)              |
-| `useWeatherHook` | [Usage](#useweatherhook)           |
+| Command      | Description                        | Parameter 1      | Parameter 2          |
+| ------------ | ---------------------------------- | ---------------- | -------------------- |
+| `getDensity` | Returns current density multiplier |
+| `getTime`    | Returns current time object        |
+| `getWeather` | Returns current weather            |
+| `setWeather` | Changes current weather            | weather?: string | disableSync: boolean |
+| `useTime`    | [Usage](#usetime)                  | Hook Options     |
+| `useWeather` | [Usage](#useweather)               | Hook Options     |
 
 # Hooks
 
-## useTimeHook
+## useTime
 
-> Add line below to your fxmanifest.lua or use exports
+### Hook Options
 
-```lua
-client_script "@cfx-anes-worldsync/client/time/cl_hook.lua"
-```
-
-### Usage
-
-```lua
-local dayTime = false
-local nightTime = false
-
-useTimeHook({
-    cb = function(state) dayTime = state end,
-    range = {7, 19}
-})
-
--- Hook returns cb function to destroy the hook
-local destroy = useTimeHook({
-    event = "nightTime",
-    range = {19, 7}
-})
-
-RegisterCommand("destroy", destroy)
-AddEventHandler("nightTime", function(state) nightTime = state end)
-```
-
-## useWeatherHook
-
-> Add line below to your fxmanifest.lua or use exports
-
-```lua
-client_script "@cfx-anes-worldsync/client/weather/cl_hook.lua"
-```
+| Option         | Type              |
+| -------------- | ----------------- |
+| range          | number[]          |
+| onStateChange? | string / Function |
 
 ### Usage
 
 ```lua
-local rainy = false
+local dayTime = useTime({
+    range = {7, 19},
+    onStateChange = function(state)
+        -- Do something
+    end
+})
 
-useWeatherHook({
-    weathers = {"XMAS"},
-    cb = function(state)
+print(dayTime.state) -- true / false
+dayTime.destroy() -- Saves last state (no longer updating)
+
+AddEventHandler("nightTime", function(state)
+    -- Do something
+end)
+
+local nightTime = exports["cfx-anes-worldsync"]:useTime({
+    range = {19, 7},
+    onStateChange = "nightTime"
+})
+```
+
+## useWeather
+
+### Hook Options
+
+| Option         | Type              |
+| -------------- | ----------------- |
+| targets        | string[]          |
+| onStateChange? | string / Function |
+
+### Usage
+
+```lua
+useWeather({
+    targets = {"XMAS"},
+    onStateChange = function(state)
         SetForceVehicleTrails(state)
         SetForcePedFootstepsTracks(state)
     end
 })
 
--- Hook returns cb function to destroy the hook
-local destroy = useWeatherHook({
-    weathers = {"RAIN", "THUNDER"}
-    event = "rainy"
+AddEventHandler("rainy", function(state)
+    -- Do something
+end)
+
+local rainy = exports["cfx-anes-worldsync"]:useWeather({
+    targets = {"RAIN", "THUNDER"},
+    onStateChange = "rainy"
 })
 
-RegisterCommand("destroy", destroy)
-AddEventHandler("rainy", function(state) rainy = state end)
+print(rainy.state) -- true / false
+rainy.destroy() -- Saves last state (no longer updating)
 ```

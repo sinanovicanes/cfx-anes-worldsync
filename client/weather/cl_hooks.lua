@@ -1,6 +1,6 @@
-useWeatherHook({
-    weathers = {"XMAS"},
-    cb = function(state)
+useWeather({
+    targets = {"XMAS"},
+    onStateChange = function(state)
         SetForceVehicleTrails(state)
         SetForcePedFootstepsTracks(state)
     end
