@@ -8,7 +8,7 @@ RegisterCommand("density", function(source, args)
     local newDensity = tonumber(args[1])
     if not newDensity or density == newDensity then return end
 
-    density = newDensity
+    density = newDensity + .0
     print("Setting density: " .. density)
     TriggerClientEvent("worldSync:density:set", -1, density)
 end, false)
